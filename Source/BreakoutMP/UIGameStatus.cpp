@@ -4,6 +4,7 @@
 #include "Containers/UnrealString.h"
 #include "Kismet/GameplayStatics.h"
 #include "Paddle.h"
+#include "BreakoutBall.h"
 
 //The whole class is a mortal sin, but it works and I'm already behind all deadlines, so-
 void UUIGameStatus::NativeConstruct()
@@ -28,6 +29,11 @@ bool UUIGameStatus::Initialize()
 	if (P2ScoreDisplay)
 	{
 		P2ScoreDisplay->TextDelegate.BindUFunction(this, "SetNewScore2");
+	}
+
+	if (EnergyDisplay)
+	{
+		EnergyDisplay->TextDelegate.BindUFunction(this, "SetEnergy");
 	}
 
 	return true;
@@ -56,6 +62,30 @@ FText UUIGameStatus::SetNewScore2()
 	{
 		AddPaddleLinks();
 		return FText::FromString("no p2 paddle!");
+	}
+}
+
+FText UUIGameStatus::SetEnergy()
+{
+	if (EnergySource != nullptr)
+	{
+		return FText::FromString(FString::FromInt(*EnergySource));
+	}
+	else
+	{
+		AddEnergyLink();
+		return FText::FromString("no ball!");
+	}
+	
+}
+
+void UUIGameStatus::AddEnergyLink()
+{
+	TArray<AActor*> Balls;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABreakoutBall::StaticClass(), Balls);
+	if (Cast<ABreakoutBall>(Balls[0]))
+	{
+		EnergySource = Cast<ABreakoutBall>(Balls[0])->GetEnergy();
 	}
 }
 

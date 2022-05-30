@@ -25,12 +25,20 @@ protected:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		UBorder* P2Affinity;
 
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+		UTextBlock* EnergyDisplay;
+
 	APaddle* ScoreSource1;
 
 	APaddle* ScoreSource2;
 
+	int32* EnergySource = nullptr;
+
 	UFUNCTION()
 		void AddPaddleLinks();
+
+	UFUNCTION()
+		void AddEnergyLink();
 
 public:
 	virtual void NativeConstruct() override;
@@ -42,5 +50,8 @@ public:
 	
 	UFUNCTION()
 		FText SetNewScore2();
+
+	UFUNCTION()
+		FText SetEnergy();
 	
 };

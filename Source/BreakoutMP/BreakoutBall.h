@@ -43,6 +43,7 @@ protected:
 	UPROPERTY(Replicated)
 		bool IsMoving = true;
 
+	UPROPERTY(Replicated)
 		int32 Energy = 0;
 
 protected:
@@ -70,4 +71,6 @@ public:
 		void StopMove();
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const;
+
+	int32* GetEnergy() { return &Energy; };
 };

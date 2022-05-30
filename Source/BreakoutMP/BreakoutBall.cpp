@@ -53,6 +53,7 @@ void ABreakoutBall::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& 
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ABreakoutBall, IsMoving);
+	DOREPLIFETIME(ABreakoutBall, Energy);
 	//DOREPLIFETIME_CONDITION(APingPongBall, IsMoving, COND_SimulatedOnly);
 }
 

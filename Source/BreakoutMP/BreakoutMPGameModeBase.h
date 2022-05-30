@@ -6,6 +6,7 @@
 
 class APlayerBatController;
 class APlayerStart;
+class ATargetPoint;
 
 UCLASS()
 class BREAKOUTMP_API ABreakoutMPGameModeBase : public AGameModeBase
@@ -24,12 +25,17 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		APlayerStart* P2Start;
 
+	//markers for possible gate placement
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		ATargetPoint* P1Goals;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		ATargetPoint* P2Goals;
+
 public:
 	ABreakoutMPGameModeBase();
 
 	virtual void BeginPlay() override;
 
 	virtual void PostLogin(APlayerController* NewPlayer) override;
-
-
 };

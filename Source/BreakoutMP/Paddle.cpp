@@ -1,5 +1,8 @@
 #include "Paddle.h"
 #include "Components/BoxComponent.h"
+#include "PlayerBatController.h"
+#include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 
 APaddle::APaddle()
 {
@@ -20,13 +23,19 @@ APaddle::APaddle()
 void APaddle::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	UpdateSkin_Multicast(TexColor);
 }
 
 void APaddle::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
 
+void APaddle::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(APaddle, TexColor);
 }
 
 bool APaddle::MoveRight_ServerSide_Validate(float AxisValue)
@@ -53,3 +62,28 @@ void APaddle::MoveRight_ServerSide_Implementation(float AxisValue)
 	}
 }
 
+void APaddle::UpdateScore_ServerSide_Implementation(int32 ExtraScore)
+{
+	LocalScore += ExtraScore;
+	UpdateScore_Multicast(LocalScore);
+}
+
+void APaddle::UpdateScore_Multicast_Implementation(int32 ExtraScore)
+{
+	LocalScore = ExtraScore;
+}
+
+void APaddle::UpdateSkin_ServerSide_Implementation(FVector NewColor)
+{
+	TexColor = NewColor;
+	UpdateSkin_Multicast(NewColor);
+}
+
+void APaddle::UpdateSkin_Multicast_Implementation(FVector NewColor)
+{
+	TexColor = NewColor;
+	if (BodyMesh)
+	{
+		BodyMesh->SetVectorParameterValueOnMaterials("ColorParam", NewColor);
+	}
+}

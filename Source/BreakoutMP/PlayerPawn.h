@@ -6,6 +6,7 @@
 
 class USpringArmComponent;
 class UCameraComponent;
+class UUIGameStatus;
 
 UCLASS()
 class BREAKOUTMP_API APlayerPawn : public APawn
@@ -19,6 +20,15 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 		UCameraComponent* Camera;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		TSubclassOf<UUIGameStatus> StatusWidgetClass;
+
+	UPROPERTY()
+		UUserWidget* PlayerWidget;
+
+	UPROPERTY()
+		FVector PColor;
+
 public:
 	APlayerPawn();
 
@@ -30,4 +40,5 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	void SetNewColor(FVector NewColor) { PColor = NewColor; };
 };

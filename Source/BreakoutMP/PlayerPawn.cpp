@@ -1,5 +1,6 @@
 #include "PlayerPawn.h"
 #include "Camera/CameraComponent.h"
+#include "UIGameStatus.h"
 #include "GameFramework/SpringArmComponent.h"
 
 APlayerPawn::APlayerPawn()
@@ -21,7 +22,16 @@ APlayerPawn::APlayerPawn()
 void APlayerPawn::BeginPlay()
 {
 	Super::BeginPlay();
+
+	//Calling in the widget
+	if (StatusWidgetClass)
+	{
+		PlayerWidget = CreateWidget(GetWorld(), StatusWidgetClass);
+
+		PlayerWidget->AddToViewport(0);
+	}
 }
+
 
 void APlayerPawn::Tick(float DeltaTime)
 {

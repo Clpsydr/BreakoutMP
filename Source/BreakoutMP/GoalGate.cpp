@@ -21,7 +21,6 @@ AGoalGate::AGoalGate()
 void AGoalGate::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 void AGoalGate::Tick(float DeltaTime)

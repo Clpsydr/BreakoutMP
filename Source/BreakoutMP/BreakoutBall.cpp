@@ -4,6 +4,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/SphereComponent.h"
 #include "GoalGate.h"
+#include "Paddle.h"
 #include "BreakoutMPGameModeBase.h"
 #include "Net/UnrealNetwork.h"
 
@@ -71,12 +72,10 @@ void ABreakoutBall::Move_ServerSide_Implementation(float DeltaTime)
 
 	if (!SetActorLocation(NewLoc, true, &HitResult))
 	{
-		
-		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 12.f, FColor::Yellow,
-			TEXT("Ball" + GetName() + "collided with" + HitResult.GetActor()->GetName()));
-		
-		AGoalGate* SuspectedGate = Cast<AGoalGate>(HitResult.GetActor());
+			
 	// Gate conditional collision and position reset
+		AGoalGate* SuspectedGate = Cast<AGoalGate>(HitResult.GetActor());
+	
 		if (SuspectedGate) 
 		{
 			SuspectedGate->GotScored_ServerSide(Energy);
@@ -91,31 +90,46 @@ void ABreakoutBall::Move_ServerSide_Implementation(float DeltaTime)
 			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.f, FColor::Yellow,
 				TEXT("Energy amplifies: " + FString::FromInt(Energy)));  
 		}
+	//
 
-
-	// Current direction
-		FVector MoveVector = VForward - CurrentLoc;
-		MoveVector.Normalize();
-		FVector ResetPosition = CurrentLoc + MoveVector * DeltaTime * MoveSpeed * 5;  //????
-		DrawDebugDirectionalArrow(GetWorld(), NewLoc + MoveVector * AuxSpeed, NewLoc, 
+	// Stepping back from collising for RollBackNetcode amount of pixels
+	// Backwards vector fixed by finding difference between new and old positions instead of using frontal vector
+		FVector ReverseVector = CurrentLoc - NewLoc;
+		ReverseVector.Normalize();
+		FVector ResetPosition = CurrentLoc + ReverseVector * DeltaTime * MoveSpeed * RollBackNetcode; 
+		DrawDebugDirectionalArrow(GetWorld(), CurrentLoc + ReverseVector * AuxSpeed, CurrentLoc, 
 								DebugArrowLength, 
 								FColor::Yellow,	false, 3.f, 0, 5.f);
 	//
 
-	// Fixing related to the impact point
+	// Vector of force perpendicular to the hit surface
 		FVector ImpactCorrection = HitResult.ImpactPoint + HitResult.ImpactNormal * AuxSpeed;
-		DrawDebugDirectionalArrow(GetWorld(), HitResult.ImpactPoint, 
-								HitResult.ImpactPoint + HitResult.ImpactNormal * AuxSpeed,
+		DrawDebugDirectionalArrow(GetWorld(), HitResult.ImpactPoint, ImpactCorrection,
 								DebugArrowLength, 
 								FColor::Orange,	false, 3.f, 0, 5.f);
 	//
 
-	// New direction after turning
-		float AimAtAngle = FMath::RadiansToDegrees(acosf(FVector::DotProduct(MoveVector, HitResult.ImpactNormal)));
-		MoveVector = MoveVector.RotateAngleAxis(AimAtAngle * 2, FVector(0, 0, 1));
-		FVector NewTargetMove = NewLoc + MoveVector * AuxSpeed;
-		NewTargetMove.Z = CurrentLoc.Z;
-		DrawDebugDirectionalArrow(GetWorld(), NewLoc, NewTargetMove, 
+	// New direction from angle between incoming vector and surface normal 
+		float AimAtAngle = FMath::RadiansToDegrees(acosf(FVector::DotProduct(ReverseVector, HitResult.ImpactNormal)));
+
+		// Rotation occurs through blind method of checking if such rotation even reasonable, 
+		// ie dot product of result isnt behind the contact surface
+		// would be better if I just figured out the angle to surface
+		FVector MoveVector;
+		if (FVector::DotProduct(ReverseVector.RotateAngleAxis(AimAtAngle * 2, FVector(0, 0, 1)), HitResult.ImpactNormal) > 0)
+		{
+			MoveVector = ReverseVector.RotateAngleAxis(AimAtAngle * 2, FVector(0, 0, 1));
+		}
+		else
+		{
+			MoveVector = ReverseVector.RotateAngleAxis(-AimAtAngle * 2, FVector(0, 0, 1));
+		}
+
+		FVector NewDirection = NewLoc + MoveVector * MoveSpeed;  //* AuxSpeed;
+		NewDirection.Z = CurrentLoc.Z;
+		
+
+		DrawDebugDirectionalArrow(GetWorld(), NewLoc, NewDirection, 
 								DebugArrowLength, 
 								FColor::Cyan, false, 3.f, 0, 5.f);
 	//
@@ -124,14 +138,20 @@ void ABreakoutBall::Move_ServerSide_Implementation(float DeltaTime)
 		ResetPosition.Z = BallGroundCorrection;
 		SetActorLocation(ResetPosition);		
 		FRotator CurrentRotation = GetActorRotation();
-		FRotator NewRotation = UKismetMathLibrary::FindLookAtRotation(CurrentLoc, NewTargetMove);
+		FRotator NewRotation = UKismetMathLibrary::FindLookAtRotation(CurrentLoc, NewDirection);
 
 	// Angular correction
 		NewRotation.Pitch = 0.f;
-		NewRotation.Yaw = NewRotation.Yaw + FMath::RandRange(-AngleRandomisation, AngleRandomisation);
+
+		// Additional angle tweak relative to paddle movement
+		APaddle* MaybePaddle = Cast<APaddle>(HitResult.GetActor());
+		if (MaybePaddle)
+		{
+			NewRotation.Yaw = NewRotation.Yaw + MaybePaddle->GetDirection() * 20;; //+FMath::RandRange(-10, 10); 
+		}
 		SetActorRotation(NewRotation);
 
-	// Bells&Whistles
+	// Clientside effects
 		Multicast_HitEffect();
 	}
 }

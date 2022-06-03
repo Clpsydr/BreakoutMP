@@ -28,6 +28,12 @@ protected:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		UTextBlock* EnergyDisplay;
 
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+		UBorder* WaitingMSG;
+
+	UPROPERTY(meta = (BindWidgetAnim), Transient)
+		UWidgetAnimation* FlickerAnimation;
+
 	APaddle* ScoreSource1;
 
 	APaddle* ScoreSource2;
@@ -44,6 +50,8 @@ public:
 	virtual void NativeConstruct() override;
 
 	virtual bool Initialize() override;
+
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 	UFUNCTION()
 		FText SetNewScore1();

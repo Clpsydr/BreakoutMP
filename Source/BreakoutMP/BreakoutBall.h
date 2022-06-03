@@ -31,11 +31,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug params")
 		float DebugArrowLength = 30.f;
 
+	// fixed altitude of the ball
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug params")
 		float BallGroundCorrection = 72.f;
 
+	// responsible for pushing back the ball movement 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug params")
-		int AngleRandomisation = 10;
+		int32 RollBackNetcode = 5;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ball params")
 		UParticleSystem* HitEffect;

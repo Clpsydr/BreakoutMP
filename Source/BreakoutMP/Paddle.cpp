@@ -50,6 +50,7 @@ void APaddle::MoveRight_ServerSide_Implementation(float AxisValue)
 {
 	if (AxisValue != 0.f)
 	{
+		LocalAxis = AxisValue;
 		UE_LOG(LogTemp, Warning, TEXT("Paddle attempting to move on server"));
 
 		FVector CurrentLocation = GetActorLocation();
@@ -59,6 +60,10 @@ void APaddle::MoveRight_ServerSide_Implementation(float AxisValue)
 		{
 			SetActorLocation(CurrentLocation);
 		}
+	}
+	else
+	{
+		LocalAxis = 0;
 	}
 }
 

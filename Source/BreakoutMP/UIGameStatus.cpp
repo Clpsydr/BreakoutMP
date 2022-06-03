@@ -6,6 +6,9 @@
 #include "Paddle.h"
 #include "BreakoutBall.h"
 
+//WaitingMsg border
+//Blinkin animation
+
 //The whole class is a mortal sin, but it works and I'm already behind all deadlines, so-
 void UUIGameStatus::NativeConstruct()
 {
@@ -18,12 +21,16 @@ bool UUIGameStatus::Initialize()
 
 	if (!Success) return false;
 
+	if (FlickerAnimation)
+	{
+		PlayAnimation(FlickerAnimation, 0.f, 0, EUMGSequencePlayMode::Forward, false);
+	}
+
 	AddPaddleLinks();
 
 	if (P1ScoreDisplay)
 	{
 		P1ScoreDisplay->TextDelegate.BindUFunction(this, "SetNewScore1");
-		
 	}
 
 	if (P2ScoreDisplay)
@@ -37,6 +44,19 @@ bool UUIGameStatus::Initialize()
 	}
 
 	return true;
+}
+
+void UUIGameStatus::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+	Super::NativeTick(MyGeometry, InDeltaTime);
+
+	if (WaitingMSG)
+	{
+		if (WaitingMSG->Visibility == ESlateVisibility::Visible && ScoreSource1 && ScoreSource2)
+		{
+			WaitingMSG->SetVisibility(ESlateVisibility::Collapsed);
+		}
+	}
 }
 
 FText UUIGameStatus::SetNewScore1()
@@ -83,7 +103,7 @@ void UUIGameStatus::AddEnergyLink()
 {
 	TArray<AActor*> Balls;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABreakoutBall::StaticClass(), Balls);
-	if (Cast<ABreakoutBall>(Balls[0]))
+	if (Balls.Num() > 0 && Cast<ABreakoutBall>(Balls[0]))
 	{
 		EnergySource = Cast<ABreakoutBall>(Balls[0])->GetEnergy();
 	}

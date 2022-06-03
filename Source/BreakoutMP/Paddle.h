@@ -27,6 +27,9 @@ protected:
 	UPROPERTY(Replicated)
 		FVector TexColor = FVector(1.f, 1.f, 1.f);
 
+	UPROPERTY()
+		int32 LocalAxis = 0;
+
 public:
 	APaddle();
 
@@ -57,6 +60,7 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 		void UpdateSkin_Multicast(FVector NewColor);
 
-	
+	UFUNCTION()
+		int32 GetDirection() { return LocalAxis; };
 
 };

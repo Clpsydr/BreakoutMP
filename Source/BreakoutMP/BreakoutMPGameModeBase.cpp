@@ -1,7 +1,8 @@
 #include "BreakoutMPGameModeBase.h"
 #include "PlayerBatController.h"
 #include "PlayerPawn.h"
-#include "Paddle.h"
+//#include "Paddle.h"
+#include "BreakoutBall.h"
 #include "Engine/TargetPoint.h"
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
@@ -22,6 +23,8 @@ void ABreakoutMPGameModeBase::PostLogin(APlayerController* NewPlayer)
 	Super::PostLogin(NewPlayer);
 
 	UWorld* World = GetWorld();
+	
+	//Searching for existing objects
 	if (World && (!P1Start || !P2Start))
 	{
 		TArray<AActor*> FoundActors;
@@ -47,6 +50,7 @@ void ABreakoutMPGameModeBase::PostLogin(APlayerController* NewPlayer)
 	APlayerStart* StartPosition = NULL;
 	ATargetPoint* PlayersGate = NULL;
 
+	//incoming player assigned to the vacant position
 	if (Player1 == NULL)
 	{
 		Player1 = (APlayerBatController*)NewPlayer;
@@ -71,6 +75,7 @@ void ABreakoutMPGameModeBase::PostLogin(APlayerController* NewPlayer)
 		return;
 	}
 
+	//further spawning of camera, controller color init
 	APlayerPawn* NewPawn = Cast<APlayerPawn>(NewPlayer->GetPawn());
 	if (!NewPawn)
 	{
@@ -81,7 +86,7 @@ void ABreakoutMPGameModeBase::PostLogin(APlayerController* NewPlayer)
 	{
 		NewPawn->SetActorLocation(StartPosition->GetActorLocation());
 		NewPawn->SetActorRotation(StartPosition->GetActorRotation());
-		NewPawn->SetNewColor(NewSkin);	 // this isnt actually used lol
+		//NewPawn->SetNewColor(NewSkin);	 // this isnt actually used lol
 
 		NewPlayer->SetPawn(NewPawn);
 
@@ -91,5 +96,31 @@ void ABreakoutMPGameModeBase::PostLogin(APlayerController* NewPlayer)
 	else
 	{
 		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.f, FColor::Red, TEXT("Failed to find any start position"));
+	}
+
+	/// /// /// Begin the game 
+
+	if (Player1 && Player2)
+	{
+		MatchStart(World);
+	}
+}
+
+void ABreakoutMPGameModeBase::MatchStart(UWorld* WorldToSpawn)
+{
+	if (WorldToSpawn)
+	{
+		if (GameBall)
+		{
+			GameBall->Destroy();
+		}
+
+		GameBall = WorldToSpawn->SpawnActor<ABreakoutBall>(BallType);
+		GameBall->SetActorLocation(FVector(0.f, 0.f, 72.f));
+		FRotator Something = GameBall->GetActorRotation();
+		Something.Yaw = Something.Yaw + FMath::RandRange(-90, 90);
+		GameBall->SetActorRotation(Something);
+
+		
 	}
 }

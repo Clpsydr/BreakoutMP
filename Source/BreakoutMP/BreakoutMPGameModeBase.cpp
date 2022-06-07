@@ -86,7 +86,6 @@ void ABreakoutMPGameModeBase::PostLogin(APlayerController* NewPlayer)
 	{
 		NewPawn->SetActorLocation(StartPosition->GetActorLocation());
 		NewPawn->SetActorRotation(StartPosition->GetActorRotation());
-		//NewPawn->SetNewColor(NewSkin);	 // this isnt actually used lol
 
 		NewPlayer->SetPawn(NewPawn);
 
@@ -120,7 +119,5 @@ void ABreakoutMPGameModeBase::MatchStart(UWorld* WorldToSpawn)
 		FRotator Something = GameBall->GetActorRotation();
 		Something.Yaw = Something.Yaw + FMath::RandRange(-90, 90);
 		GameBall->SetActorRotation(Something);
-
-		
 	}
 }

@@ -26,9 +26,6 @@ protected:
 	UPROPERTY()
 		UUserWidget* PlayerWidget;
 
-	UPROPERTY()
-		FVector PColor;
-
 public:
 	APlayerPawn();
 
@@ -39,6 +36,4 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-	void SetNewColor(FVector NewColor) { PColor = NewColor; };
 };

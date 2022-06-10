@@ -22,6 +22,12 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 		UStaticMeshComponent* BallMesh;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		TSoftObjectPtr<UStaticMesh> BallMeshRef;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		TSoftObjectPtr<UMaterial> BallMatRef;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ball params")
 		float MoveSpeed = 100.f;
 
@@ -39,9 +45,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug params")
 		int32 RollBackNetcode = 5;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ball params")
-		UParticleSystem* HitEffect;
-
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ball params")
+		
+	
 	UPROPERTY(Replicated)
 		bool IsMoving = true;
 
@@ -62,6 +68,14 @@ protected:
 
 	UFUNCTION(NetMulticast, Unreliable)
 		void Multicast_HitEffect();
+
+	UParticleSystem* HitEffect;
+
+	UStaticMesh* LoadBallMesh();
+
+	UMaterial* LoadBallMat();
+
+	UParticleSystem* LoadVFXHard();
 
 public:
 	virtual void Tick(float DeltaTime) override;

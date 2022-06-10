@@ -62,7 +62,11 @@ void APlayerBatController::PaddleMoveRight_ServerSide_Implementation(float AxisV
 {
 	if (Paddle)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Server moves paddle"));
+		if (AxisValue != 0.f)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Server moves paddle"));
+		}
+		
 		Paddle->MoveRight_ServerSide(AxisValue);
 	}
 	else

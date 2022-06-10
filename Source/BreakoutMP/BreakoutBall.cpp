@@ -6,6 +6,9 @@
 #include "GoalGate.h"
 #include "Paddle.h"
 #include "BreakoutMPGameModeBase.h"
+#include "Engine/StreamableManager.h"
+#include "Engine/AssetManager.h"
+#include "Particles/ParticleSystem.h"
 #include "Net/UnrealNetwork.h"
 
 ABreakoutBall::ABreakoutBall()
@@ -27,6 +30,10 @@ void ABreakoutBall::BeginPlay()
 {
 	Super::BeginPlay();
 	Energy = 1;
+
+	BallMesh->SetStaticMesh(LoadBallMesh());
+	BallMesh->SetMaterial(0, LoadBallMat());
+	HitEffect = LoadVFXHard();
 }
 
 void ABreakoutBall::Tick(float DeltaTime)
@@ -185,4 +192,37 @@ void ABreakoutBall::Multicast_HitEffect_Implementation()
 	}
 }
 
+UStaticMesh* ABreakoutBall::LoadBallMesh()
+{
+	if (BallMeshRef.IsPending())
+	{
+		const FSoftObjectPath& AssetRef = BallMeshRef.ToStringReference();
 
+		FStreamableManager& StreamableManager = UAssetManager::Get().GetStreamableManager();
+		BallMeshRef = Cast<UStaticMesh>(StreamableManager.LoadSynchronous(AssetRef));
+	}
+
+	return BallMeshRef.Get();
+}
+
+UMaterial* ABreakoutBall::LoadBallMat()
+{
+	if (BallMatRef.IsPending())
+	{
+		const FSoftObjectPath& AssetRef = BallMatRef.ToStringReference();
+
+		FStreamableManager& StreamableManager = UAssetManager::Get().GetStreamableManager();
+		BallMatRef = Cast<UMaterial>(StreamableManager.LoadSynchronous(AssetRef));
+	}
+
+	return BallMatRef.Get();
+}
+
+UParticleSystem* ABreakoutBall::LoadVFXHard()
+{
+	return LoadObject<UParticleSystem>(NULL,
+		TEXT("/Game/Breakout/Effects/E_AltShock.E_AltShock"), 
+		NULL,
+		LOAD_None, 
+		NULL);
+}

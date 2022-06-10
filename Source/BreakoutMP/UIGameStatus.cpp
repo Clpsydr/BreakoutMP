@@ -21,10 +21,14 @@ bool UUIGameStatus::Initialize()
 
 	if (!Success) return false;
 
+	//^TODO:  I have no virtual idea, why running playanimation on client makes server collapse instantly
+	/*
 	if (FlickerAnimation)
 	{
-		PlayAnimation(FlickerAnimation, 0.f, 0, EUMGSequencePlayMode::Forward, false);
+		PlayAnimationForward(FlickerAnimation, 1.f, false);
+		PlayAnimation(FlickerAnimation, 0.f, 5, EUMGSequencePlayMode::PingPong, false);
 	}
+	*/
 
 	AddPaddleLinks();
 
@@ -96,7 +100,7 @@ FText UUIGameStatus::SetEnergy()
 		AddEnergyLink();
 		return FText::FromString("no ball!");
 	}
-	
+	return FText::FromString("no will");
 }
 
 void UUIGameStatus::AddEnergyLink()

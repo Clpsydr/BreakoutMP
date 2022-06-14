@@ -3,6 +3,8 @@
 #include "PlayerBatController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "Engine/StreamableManager.h"
+#include "Engine/AssetManager.h"
 
 APaddle::APaddle()
 {
@@ -23,7 +25,30 @@ APaddle::APaddle()
 void APaddle::BeginPlay()
 {
 	Super::BeginPlay();
-	UpdateSkin_Multicast(TexColor);
+
+	LoadBodyMesh();
+}
+
+void APaddle::LoadBodyMesh()
+{
+	FStreamableDelegate LoadMeshDelegate;
+	LoadMeshDelegate.BindUObject(this, &APaddle::OnBodyMeshLoaded);
+
+	UAssetManager& AssetManager = UAssetManager::Get();
+	FStreamableManager& StreamableManager = AssetManager.GetStreamableManager();
+
+	AssetHandle = StreamableManager.RequestAsyncLoad(PaddleMeshRef.ToStringReference(), LoadMeshDelegate);
+}
+
+void APaddle::OnBodyMeshLoaded()
+{
+	UStaticMesh* LoadedMesh = Cast<UStaticMesh>(AssetHandle.Get()->GetLoadedAsset());
+	if (LoadedMesh)
+	{
+		BodyMesh->SetStaticMesh(LoadedMesh);
+		BodyMesh->SetMaterial(0, PaddleMaterial);
+		UpdateSkin_Multicast(TexColor);
+	}
 }
 
 void APaddle::Tick(float DeltaTime)

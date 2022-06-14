@@ -6,6 +6,7 @@
 class UBoxComponent;
 class UUIGameStatus;
 class APlayerBatController;
+struct FStreamableHandle;
 
 UCLASS()
 class BREAKOUTMP_API APaddle : public AActor
@@ -17,6 +18,14 @@ protected:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 		UStaticMeshComponent* BodyMesh;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
+		UMaterial* PaddleMaterial;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Assets")
+		TSoftObjectPtr<UStaticMesh> PaddleMeshRef;
+
+	TSharedPtr<FStreamableHandle> AssetHandle;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float MoveSpeed = 100.f;
@@ -35,6 +44,11 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+
+	UFUNCTION()
+		void LoadBodyMesh();
+
+	void OnBodyMeshLoaded();
 
 public:	
 	virtual void Tick(float DeltaTime) override;

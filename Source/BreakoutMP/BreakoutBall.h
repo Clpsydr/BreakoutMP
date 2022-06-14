@@ -6,6 +6,8 @@
 
 class USphereComponent;
 class UParticleSystem;
+struct FStreamableHandle;
+struct TSoftObjectPath;
 
 UCLASS()
 class BREAKOUTMP_API ABreakoutBall : public AActor
@@ -24,6 +26,10 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		TSoftObjectPtr<UStaticMesh> BallMeshRef;
+
+	//definitely needs an asset manager just to rotate async handles
+	TSharedPtr<FStreamableHandle> AssetHandle;
+	TSharedPtr<FStreamableHandle> AssetHandle2;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 		TSoftObjectPtr<UMaterial> BallMatRef;
@@ -45,9 +51,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug params")
 		int32 RollBackNetcode = 5;
 
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ball params")
-		
-	
 	UPROPERTY(Replicated)
 		bool IsMoving = true;
 
@@ -71,11 +74,21 @@ protected:
 
 	UParticleSystem* HitEffect;
 
-	UStaticMesh* LoadBallMesh();
-
 	UMaterial* LoadBallMat();
 
 	UParticleSystem* LoadVFXHard();
+
+	UFUNCTION(BlueprintCallable, CallInEditor)
+	void LoadBodyMesh();
+
+	void LoadEffects();
+
+	void OnParticlesLoaded();
+
+	void OnBodyMeshLoaded();
+
+private:
+	FSoftObjectPath ParticlePath = TEXT("/Game/Breakout/Effects/E_AltShock.E_AltShock");
 
 public:
 	virtual void Tick(float DeltaTime) override;

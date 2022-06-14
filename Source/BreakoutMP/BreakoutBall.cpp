@@ -31,9 +31,10 @@ void ABreakoutBall::BeginPlay()
 	Super::BeginPlay();
 	Energy = 1;
 
-	BallMesh->SetStaticMesh(LoadBallMesh());
+	LoadBodyMesh();
 	BallMesh->SetMaterial(0, LoadBallMat());
-	HitEffect = LoadVFXHard();
+
+	LoadEffects();
 }
 
 void ABreakoutBall::Tick(float DeltaTime)
@@ -192,17 +193,42 @@ void ABreakoutBall::Multicast_HitEffect_Implementation()
 	}
 }
 
-UStaticMesh* ABreakoutBall::LoadBallMesh()
+void ABreakoutBall::LoadBodyMesh()
 {
-	if (BallMeshRef.IsPending())
+	FStreamableDelegate LoadMeshDelegate;
+	LoadMeshDelegate.BindUObject(this, &ABreakoutBall::OnBodyMeshLoaded);
+
+	UAssetManager& AssetManager = UAssetManager::Get();
+	FStreamableManager& StreamableManager = AssetManager.GetStreamableManager();
+
+	AssetHandle = StreamableManager.RequestAsyncLoad(BallMeshRef.ToStringReference(), LoadMeshDelegate);
+}
+
+void ABreakoutBall::LoadEffects()
+{
+	FStreamableDelegate LoadParticleDelegate;
+	LoadParticleDelegate.BindUObject(this, &ABreakoutBall::OnParticlesLoaded);
+
+	UAssetManager& AssetManager = UAssetManager::Get();
+	FStreamableManager& StreamableManager = AssetManager.GetStreamableManager();
+
+	//how to put a hard link in there???
+	TSoftObjectPtr<UParticleSystem> ParticleRef(ParticlePath);
+	AssetHandle2 = StreamableManager.RequestAsyncLoad(ParticleRef.ToStringReference(), LoadParticleDelegate);
+}
+
+void ABreakoutBall::OnParticlesLoaded()
+{
+	HitEffect = LoadVFXHard();
+}
+
+void ABreakoutBall::OnBodyMeshLoaded()
+{
+	UStaticMesh* LoadedMesh = Cast<UStaticMesh>(AssetHandle.Get()->GetLoadedAsset());
+	if (LoadedMesh)
 	{
-		const FSoftObjectPath& AssetRef = BallMeshRef.ToStringReference();
-
-		FStreamableManager& StreamableManager = UAssetManager::Get().GetStreamableManager();
-		BallMeshRef = Cast<UStaticMesh>(StreamableManager.LoadSynchronous(AssetRef));
+		BallMesh->SetStaticMesh(LoadedMesh);
 	}
-
-	return BallMeshRef.Get();
 }
 
 UMaterial* ABreakoutBall::LoadBallMat()
@@ -221,7 +247,7 @@ UMaterial* ABreakoutBall::LoadBallMat()
 UParticleSystem* ABreakoutBall::LoadVFXHard()
 {
 	return LoadObject<UParticleSystem>(NULL,
-		TEXT("/Game/Breakout/Effects/E_AltShock.E_AltShock"), 
+		*ParticlePath.ToString(), 
 		NULL,
 		LOAD_None, 
 		NULL);

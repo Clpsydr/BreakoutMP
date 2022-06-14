@@ -212,7 +212,6 @@ void ABreakoutBall::LoadEffects()
 	UAssetManager& AssetManager = UAssetManager::Get();
 	FStreamableManager& StreamableManager = AssetManager.GetStreamableManager();
 
-	//how to put a hard link in there???
 	TSoftObjectPtr<UParticleSystem> ParticleRef(ParticlePath);
 	AssetHandle2 = StreamableManager.RequestAsyncLoad(ParticleRef.ToStringReference(), LoadParticleDelegate);
 }
